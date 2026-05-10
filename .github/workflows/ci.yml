@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  source-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[real-tokenizers,dev]"
+      - run: python -m pytest tests
+      - run: cdsd-report --with-pytest --artifacts artifacts --jobs 4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evidence-artifacts
+          path: artifacts
+
+  wheel-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install build
+      - run: python -m build
+      - shell: bash
+        run: |
+          wheel="$(ls dist/*.whl)"
+          python -m pip install --force-reinstall "${wheel}[real-tokenizers]"
+      - run: python -c "import cdsd; print(cdsd.__all__)"
+      - shell: bash
+        run: |
+          cd "${RUNNER_TEMP}"
+          cdsd-report --artifacts "${RUNNER_TEMP}/smoke_artifacts" --jobs 4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-artifacts-${{ matrix.os }}-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/smoke_artifacts
