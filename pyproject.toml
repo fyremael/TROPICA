@@ -44,9 +44,10 @@ dev = [
 cdsd-report = "cdsd.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/example/control-delta-support-decoding"
-Documentation = "https://github.com/example/control-delta-support-decoding#readme"
-Issues = "https://github.com/example/control-delta-support-decoding/issues"
+Homepage = "https://github.com/fyremael/TROPICA"
+Documentation = "https://github.com/fyremael/TROPICA#readme"
+Issues = "https://github.com/fyremael/TROPICA/issues"
+Source = "https://github.com/fyremael/TROPICA"
 
 [tool.setuptools]
 package-dir = {"" = "src", "demos" = "demos"}

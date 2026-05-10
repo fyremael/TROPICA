@@ -13,6 +13,7 @@ dist/
 
 artifacts/
 artifacts_*/
+*_artifacts/
 smoke_artifacts/
 wheel_smoke_artifacts/
 wheel_smoke_parallel/

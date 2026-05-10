@@ -7,3 +7,4 @@
 - Added bounded structured-output compiler for JSON/tool-call masks.
 - Added one-command evidence pipeline via `cdsd-report`.
 - Added stress, scale, tokenizer, structured-output, and visual report artifacts.
+- Added package metadata, CI badge, and GitHub-ready workflow hardening.

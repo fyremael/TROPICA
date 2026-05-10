@@ -1,5 +1,7 @@
 # Control-Delta Support Decoding
 
+[![CI](https://github.com/fyremael/TROPICA/actions/workflows/ci.yml/badge.svg)](https://github.com/fyremael/TROPICA/actions/workflows/ci.yml)
+
 **Planner-derived semantic support + multi-winner optimal-frontier exposure + streaming guard intersection at token time**, with a gated DeltaNet-style internal control lane.
 
 This repository is a Codex-ready implementation scaffold for turning constrained decoding into a **planner-backed control plane for reliable agentic output**.
