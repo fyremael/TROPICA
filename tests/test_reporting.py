@@ -7,6 +7,7 @@ from cdsd.reporting import (
     validate_scale,
     validate_stress,
     validate_structured_output,
+    validate_model_integration,
     validate_tokenizer_correctness,
 )
 
@@ -84,3 +85,22 @@ def test_structured_output_validator_rejects_failures_or_missing_controls():
     assert not all_passed(gates)
     assert any(gate.name == "structured:failures_zero" and not gate.passed for gate in gates)
     assert any(gate.name == "structured:adapter_hf_present" and not gate.passed for gate in gates)
+
+
+def test_model_integration_validator_requires_cases_and_providers():
+    rows = [
+        {"Provider": "scripted", "Cases": "7101", "Failures": "0"},
+        {"Provider": "hostile", "Cases": "500", "Failures": "0"},
+        {"Provider": "callable", "Cases": "250", "Failures": "0"},
+    ]
+    assert all_passed(validate_model_integration(rows))
+
+
+def test_model_integration_validator_rejects_failures_or_missing_provider():
+    rows = [
+        {"Provider": "scripted", "Cases": "5000", "Failures": "1"},
+    ]
+    gates = validate_model_integration(rows)
+    assert not all_passed(gates)
+    assert any(gate.name == "model_integration:failures_zero" and not gate.passed for gate in gates)
+    assert any(gate.name == "model_integration:hostile_present" and not gate.passed for gate in gates)

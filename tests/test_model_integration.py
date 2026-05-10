@@ -1,0 +1,84 @@
+import json
+
+import pytest
+
+from cdsd.model_integration import CallableLogitProvider, HostileLogitProvider, ScriptedLogitProvider, StructuredOutputDecodeError, StructuredOutputDecoder
+from cdsd.structured_output import HostileStructuredLogitGenerator, StructuredOutputCompiler, ToolCallSpec, decode_with_logits
+from cdsd.tokenizer_compiler import ByteTokenizer
+
+
+def schema():
+    return {
+        "type": "object",
+        "required": ["query", "limit"],
+        "properties": {
+            "query": {"type": "string", "enum": ["alpha", "beta"]},
+            "limit": {"type": "integer", "enum": [1, 2]},
+        },
+        "additionalProperties": False,
+    }
+
+
+def compiler() -> StructuredOutputCompiler:
+    return StructuredOutputCompiler(ByteTokenizer(), [ToolCallSpec("search", schema())])
+
+
+def test_hostile_provider_never_selects_illegal_token():
+    dec = StructuredOutputDecoder(compiler())
+    result = dec.decode(HostileLogitProvider(illegal_token_ids=(ord("}"), 999_999)), max_steps=256)
+
+    assert result.accepted
+    assert result.parsed is not None
+    assert result.parsed["tool"] == "search"
+    assert any(event.top_illegal_score is not None and event.top_illegal_score > event.selected_score for event in result.events)
+    assert all(event.selected_token_id != 999_999 for event in result.events)
+
+
+def test_scripted_provider_produces_exact_tool_call():
+    comp = compiler()
+    target = comp.outputs[0]
+    provider = ScriptedLogitProvider(ByteTokenizer().encode(target), illegal_token_ids=(255,))
+    result = StructuredOutputDecoder(comp).decode(provider, max_steps=256)
+
+    assert result.accepted
+    assert result.value == target
+    assert result.parsed == json.loads(target)
+    assert tuple(ByteTokenizer().encode(target)) == result.emitted_token_ids
+
+
+def test_callable_provider_receives_prefix_and_allowed_set():
+    calls: list[tuple[tuple[int, ...], set[int]]] = []
+
+    def choose_min(emitted: tuple[int, ...], allowed: set[int]):
+        calls.append((emitted, set(allowed)))
+        chosen = min(allowed)
+        return {tok: 0.0 for tok in allowed} | {chosen: 1.0, 999_999: 1_000_000.0}
+
+    result = StructuredOutputDecoder(compiler()).decode(CallableLogitProvider(choose_min), max_steps=256)
+
+    assert result.accepted
+    assert len(calls) == result.steps
+    assert calls[0][0] == ()
+    assert all(allowed for _, allowed in calls)
+
+
+def test_trace_events_are_complete_and_ordered():
+    result = StructuredOutputDecoder(compiler()).decode(HostileLogitProvider(), max_steps=256)
+
+    assert [event.step for event in result.events] == list(range(result.steps))
+    assert all(event.allowed_count > 0 for event in result.events)
+    assert result.events[-1].accepted
+    assert result.events[-1].complete_value == result.value
+
+
+def test_max_step_exhaustion_raises_typed_error():
+    with pytest.raises(StructuredOutputDecodeError):
+        StructuredOutputDecoder(compiler()).decode(HostileLogitProvider(), max_steps=1)
+
+
+def test_decode_with_logits_compatibility_wrapper_returns_state():
+    comp = compiler()
+    state = decode_with_logits(comp, HostileStructuredLogitGenerator().logits, max_steps=256)
+
+    assert comp.is_accepting(state)
+    assert comp.matches_declared_tool(state)

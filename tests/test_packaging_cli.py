@@ -9,6 +9,8 @@ from cdsd.evidence import runner
 
 def test_public_exports_import_cleanly() -> None:
     assert cdsd.StructuredOutputCompiler is not None
+    assert cdsd.StructuredOutputDecoder is not None
+    assert cdsd.HostileLogitProvider is not None
     assert cdsd.ToolCallSpec is not None
     assert cdsd.TiktokenAdapter is not None
     assert cdsd.HFTokenizerAdapter is not None

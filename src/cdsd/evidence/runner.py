@@ -48,6 +48,13 @@ REPORT_TRACKS = [
             ("structured_output_visuals", "demos.render_structured_output_visuals"),
         ],
     ),
+    (
+        "model_integration",
+        [
+            ("model_integration_harness", "demos.run_model_integration_harness"),
+            ("model_integration_visuals", "demos.render_model_integration_visuals"),
+        ],
+    ),
 ]
 
 
@@ -213,6 +220,18 @@ def structured_output_interpretation(artifact_dir: Path) -> str:
     )
 
 
+def model_integration_interpretation(artifact_dir: Path) -> str:
+    rows = read_csv_rows(artifact_dir / "model_integration_summary.csv")
+    cases = sum(int(float(row["Cases"])) for row in rows)
+    failures = sum(int(float(row["Failures"])) for row in rows)
+    trace_steps = sum(int(float(row["TraceSteps"])) for row in rows)
+    providers = sorted({row["Provider"] for row in rows})
+    return (
+        f"The offline model-integration pass covers {cases:,} provider-driven decode cases with {failures} failures "
+        f"and {trace_steps:,} trace events. Providers exercised: {', '.join(providers)}."
+    )
+
+
 def write_report_index(artifact_dir: Path, gates) -> Path:
     path = artifact_dir / "report_index.md"
     passed = all_passed(gates)
@@ -239,6 +258,12 @@ def write_report_index(artifact_dir: Path, gates) -> Path:
         "![Structured output visuals](structured_output_visuals.svg)",
         "",
         structured_output_interpretation(artifact_dir),
+        "",
+        "## Model Integration Dashboard",
+        "",
+        "![Model integration visuals](model_integration_visuals.svg)",
+        "",
+        model_integration_interpretation(artifact_dir),
         "",
         "## Stress Dashboard",
         "",
@@ -288,6 +313,9 @@ def write_manifest(artifact_dir: Path, command_results, gates) -> Path:
             artifact_entry(artifact_dir, "structured_output_summary.csv"),
             artifact_entry(artifact_dir, "structured_output_summary.md"),
             artifact_entry(artifact_dir, "structured_output_visuals.svg"),
+            artifact_entry(artifact_dir, "model_integration_summary.csv"),
+            artifact_entry(artifact_dir, "model_integration_summary.md"),
+            artifact_entry(artifact_dir, "model_integration_visuals.svg"),
             artifact_entry(artifact_dir, "report_index.md"),
         ],
         "gates": [gate.to_dict() for gate in gates],

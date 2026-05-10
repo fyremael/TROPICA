@@ -156,17 +156,10 @@ def decode_with_logits(
     *,
     max_steps: int = 512,
 ) -> TokenPrefixState:
-    state = compiler.initial_state()
-    for _ in range(max_steps):
-        if compiler.is_accepting(state) and not compiler.allowed_token_ids(state):
-            return state
-        allowed = compiler.allowed_token_ids(state)
-        if not allowed:
-            raise StructuredOutputError("Structured decoder reached empty support before accepting")
-        logits = logits_fn(state, allowed)
-        token_id = max(allowed, key=lambda tok: logits.get(tok, float("-inf")))
-        state = compiler.update(state, token_id)
-    raise StructuredOutputError("Structured decoder exceeded max_steps")
+    from .model_integration import StructuredOutputDecoder
+
+    _, state = StructuredOutputDecoder(compiler).decode_with_state_logits(logits_fn, max_steps=max_steps, stop_on_accepting=False)
+    return state
 
 
 class HostileStructuredLogitGenerator:
@@ -174,10 +167,9 @@ class HostileStructuredLogitGenerator:
         self.illegal_token_ids = tuple(illegal_token_ids)
 
     def logits(self, state: TokenPrefixState, allowed: set[int]) -> dict[int, float]:
-        scores = {tok: float(tok % 997) for tok in allowed}
-        for tok in self.illegal_token_ids:
-            scores[tok] = 1_000_000.0
-        return scores
+        from .model_integration import HostileLogitProvider
+
+        return dict(HostileLogitProvider(self.illegal_token_ids).next_logits(state.emitted, allowed))
 
 
 class HFLogitGenerator:

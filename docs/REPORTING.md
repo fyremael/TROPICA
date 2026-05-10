@@ -31,6 +31,7 @@ The `--jobs` flag runs independent report tracks concurrently:
 - scale
 - tokenizer correctness
 - structured output
+- model integration
 - pytest, when `--with-pytest` is set
 
 Each track still preserves its internal order. For example, experiment visuals
@@ -73,6 +74,7 @@ The dashboards are not decorative. Each one answers a specific trust question:
 | Experiment | Does external support eliminate invalid outputs where raw and internal-only paths fail? |
 | Tokenizer correctness | Do real tokenizer masks survive exact literals and negative controls? |
 | Structured output | Can bounded JSON/tool-call specs compile to real token-ID masks and decode under hostile logits? |
+| Model integration | Can provider-driven decode loops consume legal token masks while illegal logits fail closed? |
 | Stress | Do the contracts survive randomized and adversarial cases? |
 | Scale | Do larger frontiers preserve correctness without obvious cliffs? |
 

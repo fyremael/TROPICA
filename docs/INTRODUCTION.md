@@ -134,13 +134,14 @@ The command writes:
 - `artifacts/*_summary.md`
 - `artifacts/*_visuals.svg`
 
-The dashboards cover five surfaces.
+The dashboards cover six surfaces.
 
 | Surface | What It Shows | What Passing Means |
 | --- | --- | --- |
 | Experiment | Ablations across raw generation, grammar-only, planner-guided, ControlDelta-only, and ControlDelta plus external support | External support is the authority; internal awareness alone is not enough |
 | Tokenizer correctness | Real tokenizer exact generation and negative controls | Literal masks survive Unicode, whitespace, shared prefixes, invalid IDs, truncation, and suffix attacks |
 | Structured output | Bounded JSON/tool-call compilation and hostile decode | Real token masks can constrain generation to exact valid tool calls |
+| Model integration | Offline provider-driven decode loops and trace events | Model adapters can rank legal and illegal IDs while the decoder selects only legal support |
 | Stress | Adversarial and randomized cases across planners, guards, workflows, tokenizer automata, and ControlDelta numerics | The core contracts survive thousands of cases |
 | Scale | Larger horizons, enum counts, workflow graphs, and ControlDelta sequence sizes | Correctness remains intact as problem size increases |
 
@@ -174,7 +175,7 @@ report tracks.
 ## Minimal API Example
 
 ```python
-from cdsd import StructuredOutputCompiler, TiktokenAdapter, ToolCallSpec
+from cdsd import HostileLogitProvider, StructuredOutputCompiler, StructuredOutputDecoder, TiktokenAdapter, ToolCallSpec
 
 spec = ToolCallSpec(
     "search",
@@ -190,18 +191,15 @@ spec = ToolCallSpec(
 )
 
 compiler = StructuredOutputCompiler(TiktokenAdapter("cl100k_base"), [spec])
-state = compiler.initial_state()
+result = StructuredOutputDecoder(compiler).decode(HostileLogitProvider(), max_steps=256)
 
-while not compiler.is_accepting(state):
-    allowed = compiler.allowed_token_ids(state)
-    token_id = min(allowed)
-    state = compiler.update(state, token_id)
-
-print(compiler.complete_value(state))
+print(result.value)
+print(result.parsed)
 ```
 
-In a real model loop, the model scores candidate tokens, but the decode loop
-samples or selects only from `allowed_token_ids(state)`.
+In a real model loop, implement `LogitProvider` so your adapter scores candidate
+tokens. The decoder samples or selects only from `allowed_token_ids(state)` and
+records trace events.
 
 ## Project Map
 
@@ -209,6 +207,7 @@ samples or selects only from `allowed_token_ids(state)`.
 - `src/cdsd/masks.py`: mask utilities and safety checks
 - `src/cdsd/tokenizer_compiler.py`: tokenizer adapters and token-prefix automata
 - `src/cdsd/structured_output.py`: bounded JSON/tool-call compiler
+- `src/cdsd/model_integration.py`: offline provider-driven structured decoder
 - `src/cdsd/planners/`: exact planners for demo domains
 - `src/cdsd/guards/`: streaming guards
 - `src/cdsd/evidence/runner.py`: importable evidence orchestration
@@ -227,6 +226,7 @@ What is solid today:
 - real tokenizer adapters
 - strict tokenizer round-trip validation
 - bounded structured-output compiler
+- offline model-integration decoder and trace events
 - deterministic hostile-logit decode tests
 - report dashboards and CI gates
 
@@ -234,7 +234,7 @@ What is intentionally limited:
 
 - only a finite JSON Schema subset is supported
 - unbounded strings and unrestricted numbers are rejected
-- real model integration is optional and local-model oriented
+- hosted model integration remains out of scope; the current SDK is offline and adapter-oriented
 - the evidence suite focuses on correctness contracts, not application quality
 
 ## Future Direction
@@ -258,7 +258,8 @@ Start here, then continue in this order:
 
 1. `docs/INSTALL.md`
 2. `docs/API_QUICKSTART.md`
-3. `docs/REPORTING.md`
-4. `docs/ARCHITECTURE.md`
-5. `docs/METRICS.md`
-6. `artifacts/report_index.md` after running `cdsd-report`
+3. `docs/MODEL_INTEGRATION.md`
+4. `docs/REPORTING.md`
+5. `docs/ARCHITECTURE.md`
+6. `docs/METRICS.md`
+7. `artifacts/report_index.md` after running `cdsd-report`

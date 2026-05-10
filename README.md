@@ -41,6 +41,7 @@ then validates hard pass/fail gates. Start with:
 - `artifacts/report_manifest.json` for the machine-readable pass/fail manifest.
 - `docs/INSTALL.md` for editable install, wheel build, clean wheel smoke, and CLI workflow.
 - `docs/REPORTING.md` for evidence artifacts, gates, and faster parallel report runs.
+- `docs/MODEL_INTEGRATION.md` for offline model adapter/provider usage.
 - `docs/API_QUICKSTART.md` for a minimal `ToolCallSpec -> StructuredOutputCompiler` example.
 
 Build a wheel:
@@ -65,6 +66,7 @@ cdsd-report --artifacts smoke_artifacts --jobs 4
 - `src/cdsd/planners/tool_workflow.py` — tool workflow graph planner/guard.
 - `src/cdsd/tokenizer_compiler.py` — literal/enum token-prefix automata.
 - `src/cdsd/structured_output.py` — bounded JSON/tool-call compiler over real tokenizer IDs.
+- `src/cdsd/model_integration.py` — offline model-facing decode loop and trace events.
 - `demos/run_dyck_support_demo.py` — invalid-rate and winner-set demo.
 - `demos/run_grid_ltl_demo.py` — route planner demo with audit.
 - `demos/run_experiment_harness.py` — ablation metrics to CSV/Markdown.
@@ -97,6 +99,8 @@ python demos/run_tokenizer_correctness_harness.py
 python demos/render_tokenizer_correctness_visuals.py
 python demos/run_structured_output_harness.py
 python demos/render_structured_output_visuals.py
+python demos/run_model_integration_harness.py
+python demos/render_model_integration_visuals.py
 python -m pytest tests
 ```
 

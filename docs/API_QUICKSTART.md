@@ -1,7 +1,7 @@
 # API Quickstart
 
 ```python
-from cdsd import StructuredOutputCompiler, TiktokenAdapter, ToolCallSpec
+from cdsd import HostileLogitProvider, StructuredOutputCompiler, StructuredOutputDecoder, TiktokenAdapter, ToolCallSpec
 
 spec = ToolCallSpec(
     "search",
@@ -17,15 +17,14 @@ spec = ToolCallSpec(
 )
 
 compiler = StructuredOutputCompiler(TiktokenAdapter("cl100k_base"), [spec])
-state = compiler.initial_state()
+decoder = StructuredOutputDecoder(compiler)
+result = decoder.decode(HostileLogitProvider(), max_steps=256)
 
-while not compiler.is_accepting(state):
-    allowed = compiler.allowed_token_ids(state)
-    token_id = min(allowed)
-    state = compiler.update(state, token_id)
-
-print(compiler.complete_value(state))
+print(result.value)
+print(result.parsed)
+print(result.events[-1])
 ```
 
-The generator may rank allowed tokens however it likes. Tokens outside
-`allowed_token_ids(state)` are not candidates.
+`HostileLogitProvider` deliberately assigns high scores to illegal token IDs.
+The decoder still selects only from `allowed_token_ids(state)`, records a trace
+event per emitted token, and returns the completed JSON/tool-call value.

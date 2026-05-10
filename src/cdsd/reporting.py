@@ -22,6 +22,9 @@ REQUIRED_ARTIFACTS = [
     "structured_output_summary.csv",
     "structured_output_summary.md",
     "structured_output_visuals.svg",
+    "model_integration_summary.csv",
+    "model_integration_summary.md",
+    "model_integration_visuals.svg",
 ]
 
 
@@ -145,6 +148,20 @@ def validate_structured_output(rows: list[dict[str, str]]) -> list[GateResult]:
     ]
 
 
+def validate_model_integration(rows: list[dict[str, str]]) -> list[GateResult]:
+    failures = [int(float(row["Failures"])) for row in rows]
+    total_cases = sum(int(float(row["Cases"])) for row in rows)
+    providers = {row["Provider"] for row in rows}
+    has_hostile = "hostile" in providers
+    has_scripted_or_callable = bool({"scripted", "callable"} & providers)
+    return [
+        GateResult("model_integration:failures_zero", all(value == 0 for value in failures), f"total_failures={sum(failures)}"),
+        GateResult("model_integration:case_floor", total_cases >= 5000, f"cases={total_cases}"),
+        GateResult("model_integration:hostile_present", has_hostile, f"providers={sorted(providers)}"),
+        GateResult("model_integration:scripted_or_callable_present", has_scripted_or_callable, f"providers={sorted(providers)}"),
+    ]
+
+
 def validate_all(command_results: list[dict[str, object]], artifact_dir: Path) -> list[GateResult]:
     gates = []
     gates.extend(validate_command_results(command_results))
@@ -170,6 +187,10 @@ def validate_all(command_results: list[dict[str, object]], artifact_dir: Path) -
         gates.extend(validate_structured_output(read_csv_rows(artifact_dir / "structured_output_summary.csv")))
     except Exception as exc:
         gates.append(GateResult("structured:readable", False, repr(exc)))
+    try:
+        gates.extend(validate_model_integration(read_csv_rows(artifact_dir / "model_integration_summary.csv")))
+    except Exception as exc:
+        gates.append(GateResult("model_integration:readable", False, repr(exc)))
     return gates
 
 
