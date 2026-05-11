@@ -41,6 +41,7 @@ then validates hard pass/fail gates. Start with:
 - `artifacts/report_manifest.json` for the machine-readable pass/fail manifest.
 - `docs/INSTALL.md` for editable install, wheel build, clean wheel smoke, and CLI workflow.
 - `docs/REPORTING.md` for evidence artifacts, gates, and faster parallel report runs.
+- `docs/COLAB.md` for browser-first operator, benchmark, and researcher notebooks.
 - `docs/MODEL_INTEGRATION.md` for offline model adapter/provider usage.
 - `docs/API_QUICKSTART.md` for a minimal `ToolCallSpec -> StructuredOutputCompiler` example.
 
@@ -76,6 +77,7 @@ cdsd-report --artifacts smoke_artifacts --jobs 4
 - `tests/` — unit, validator, tokenizer, structured-output, CLI, and packaging tests.
 - `prompts/` — Codex implementation prompts by module.
 - `docs/` — architecture, metrics, and experiment plans.
+- `notebooks/` — Colab onboarding, benchmark, and researcher showcase pack.
 
 ## Compatibility commands
 

@@ -172,6 +172,14 @@ Use `--with-pytest` only from a checkout that contains `tests/`.
 Use `--jobs 1` when you want serial logs, or a larger value for faster parallel
 report tracks.
 
+For browser-first evaluation, use the Colab pack:
+
+- `notebooks/01_operator_onboarding.ipynb`
+- `notebooks/02_benchmark_suite.ipynb`
+- `notebooks/03_researcher_showcase.ipynb`
+
+See `docs/COLAB.md` for direct Colab links and the runtime contract.
+
 ## Minimal API Example
 
 ```python
@@ -214,6 +222,7 @@ records trace events.
 - `demos/`: compatibility wrappers and report harnesses
 - `tests/`: unit, negative-control, reporting, and packaging checks
 - `docs/`: installation, architecture, metrics, and API quickstarts
+- `notebooks/`: Colab operator, benchmark, and researcher workflows
 
 ## Current Status
 
@@ -229,6 +238,7 @@ What is solid today:
 - offline model-integration decoder and trace events
 - deterministic hostile-logit decode tests
 - report dashboards and CI gates
+- Colab notebooks for onboarding, benchmark evidence, and researcher demos
 
 What is intentionally limited:
 
@@ -259,7 +269,8 @@ Start here, then continue in this order:
 1. `docs/INSTALL.md`
 2. `docs/API_QUICKSTART.md`
 3. `docs/MODEL_INTEGRATION.md`
-4. `docs/REPORTING.md`
-5. `docs/ARCHITECTURE.md`
-6. `docs/METRICS.md`
-7. `artifacts/report_index.md` after running `cdsd-report`
+4. `docs/COLAB.md`
+5. `docs/REPORTING.md`
+6. `docs/ARCHITECTURE.md`
+7. `docs/METRICS.md`
+8. `artifacts/report_index.md` after running `cdsd-report`
