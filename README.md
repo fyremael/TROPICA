@@ -67,13 +67,14 @@ cdsd-report --artifacts smoke_artifacts --jobs 4
 - `src/cdsd/planners/tool_workflow.py` — tool workflow graph planner/guard.
 - `src/cdsd/tokenizer_compiler.py` — literal/enum token-prefix automata.
 - `src/cdsd/structured_output.py` — bounded JSON/tool-call compiler over real tokenizer IDs.
-- `src/cdsd/model_integration.py` — offline model-facing decode loop and trace events.
+- `src/cdsd/model_integration.py` — offline model-facing decode loop, local-model bridge, and trace events.
 - `demos/run_dyck_support_demo.py` — invalid-rate and winner-set demo.
 - `demos/run_grid_ltl_demo.py` — route planner demo with audit.
 - `demos/run_experiment_harness.py` — ablation metrics to CSV/Markdown.
 - `demos/run_scale_harness.py` — deterministic scale sweeps for core surfaces.
 - `demos/run_tokenizer_correctness_harness.py` — real-tokenizer exactness and negative controls.
 - `demos/run_structured_output_harness.py` — bounded JSON/tool-call masks over real tokenizers.
+- `demos/render_trace_explorer.py` — static model-integration trace explorer.
 - `tests/` — unit, validator, tokenizer, structured-output, CLI, and packaging tests.
 - `prompts/` — Codex implementation prompts by module.
 - `docs/` — architecture, metrics, and experiment plans.
@@ -103,6 +104,7 @@ python demos/run_structured_output_harness.py
 python demos/render_structured_output_visuals.py
 python demos/run_model_integration_harness.py
 python demos/render_model_integration_visuals.py
+python demos/render_trace_explorer.py
 python -m pytest tests
 ```
 

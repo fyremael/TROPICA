@@ -236,6 +236,7 @@ What is solid today:
 - strict tokenizer round-trip validation
 - bounded structured-output compiler
 - offline model-integration decoder and trace events
+- static trace explorer for token-by-token model-integration inspection
 - deterministic hostile-logit decode tests
 - report dashboards and CI gates
 - Colab notebooks for onboarding, benchmark evidence, and researcher demos
@@ -245,6 +246,7 @@ What is intentionally limited:
 - only a finite JSON Schema subset is supported
 - unbounded strings and unrestricted numbers are rejected
 - hosted model integration remains out of scope; the current SDK is offline and adapter-oriented
+- Hugging Face local-model support expects already-loaded model/tokenizer objects and never downloads models
 - the evidence suite focuses on correctness contracts, not application quality
 
 ## Future Direction
@@ -254,7 +256,7 @@ The next useful milestones are:
 - richer bounded schema support without weakening fail-closed behavior
 - production model adapters for local and hosted inference loops
 - larger benchmark suites for latency and memory scaling
-- trace viewers for token-by-token mask decisions
+- broader trace unification across planners, guards, and tokenizer automata
 - package signing and release automation
 - integration examples for tool routers, workflow agents, and CI review bots
 - clearer formal contracts for planner/guard composition

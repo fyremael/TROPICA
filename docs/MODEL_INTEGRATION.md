@@ -50,6 +50,17 @@ result = StructuredOutputDecoder(compiler).decode(HostileLogitProvider(), max_st
 - `events`: ordered trace events with allowed counts, selected IDs, selected
   scores, and top illegal token metadata when present
 
+Export a JSON-safe trace:
+
+```python
+trace = result.to_trace_dict(TiktokenAdapter("cl100k_base"), scenario={"provider": "hostile"})
+```
+
+Trace records include the final value, parsed object, emitted token IDs, decoded
+text when a tokenizer is provided, and ordered events. Each event includes
+allowed token IDs, selected token ID/text, selected score, top illegal token
+ID/text/score when present, and accepting state.
+
 ## Built-In Offline Providers
 
 - `HostileLogitProvider`: gives illegal token IDs very high scores to prove the
@@ -57,6 +68,25 @@ result = StructuredOutputDecoder(compiler).decode(HostileLogitProvider(), max_st
 - `ScriptedLogitProvider`: follows a target token sequence for exact deterministic
   examples.
 - `CallableLogitProvider`: wraps a user callback for custom offline adapters.
+- `HFLocalLogitProvider`: experimental bridge for already-loaded Hugging Face
+  model/tokenizer objects. It never downloads models; pass objects you loaded
+  yourself.
+
+```python
+from cdsd import HFLocalLogitProvider
+
+provider = HFLocalLogitProvider(model=my_model, tokenizer=my_tokenizer, device="cpu")
+result = decoder.decode(provider, max_steps=256)
+```
+
+Install the optional adapter metadata with:
+
+```bash
+python -m pip install -e ".[local-models]"
+```
+
+`torch` remains controlled by the user environment. Missing dependencies or
+missing model/tokenizer objects raise `LocalModelBridgeError`.
 
 ## Evidence
 
@@ -73,6 +103,7 @@ Run it directly:
 ```bash
 python demos/run_model_integration_harness.py
 python demos/render_model_integration_visuals.py
+python demos/render_trace_explorer.py
 ```
 
 Or run it through the full evidence gate:
@@ -83,4 +114,5 @@ cdsd-report --with-pytest --artifacts artifacts --jobs 4
 
 The SDK is intentionally offline. Hosted APIs and network model calls are out of
 scope for this milestone; a local model can be adapted by implementing
-`LogitProvider`.
+`LogitProvider` or by wrapping already-loaded Hugging Face objects with
+`HFLocalLogitProvider`.

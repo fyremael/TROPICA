@@ -9,7 +9,7 @@ from a browser runtime before investing in local setup.
 | --- | --- | --- |
 | Operator onboarding | [Open in Colab](https://colab.research.google.com/github/fyremael/TROPICA/blob/main/notebooks/01_operator_onboarding.ipynb) | Install TROPICA, run the evidence suite, and inspect the report index plus model-integration dashboard. |
 | Benchmark suite | [Open in Colab](https://colab.research.google.com/github/fyremael/TROPICA/blob/main/notebooks/02_benchmark_suite.ipynb) | Run `cdsd-report`, summarize gate status, display all dashboards, and zip artifacts for review. |
-| Researcher showcase | [Open in Colab](https://colab.research.google.com/github/fyremael/TROPICA/blob/main/notebooks/03_researcher_showcase.ipynb) | Compile bounded tool-call specs into real tokenizer masks, run offline logit providers, inspect traces, and exercise negative controls. |
+| Researcher showcase | [Open in Colab](https://colab.research.google.com/github/fyremael/TROPICA/blob/main/notebooks/03_researcher_showcase.ipynb) | Compile bounded tool-call specs into real tokenizer masks, run offline logit providers, inspect traces, render the static trace explorer, and exercise negative controls. |
 
 ## Runtime Contract
 
@@ -31,6 +31,7 @@ The notebooks expose the same evidence surfaces as CI:
 
 - `report_manifest.json` is the pass/fail source of truth.
 - `report_index.md` is the reviewer-facing interpretation layer.
+- `trace_explorer.html` is the token-level inspectability surface.
 - SVG dashboards show experiment, tokenizer, structured-output,
   model-integration, stress, and scale behavior.
 

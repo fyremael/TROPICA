@@ -63,6 +63,7 @@ def test_operator_and_benchmark_run_report_command():
     assert "cdsd-report" in benchmark
     assert "experiment_visuals.svg" in benchmark
     assert "model_integration_visuals.svg" in benchmark
+    assert "trace_explorer.html" in benchmark
     assert "scale_visuals.svg" in benchmark
 
 
@@ -76,6 +77,8 @@ def test_researcher_notebook_uses_model_integration_api():
         "HostileLogitProvider",
         "ScriptedLogitProvider",
         "CallableLogitProvider",
+        "HFLocalLogitProvider",
         "StructuredOutputDecodeError",
+        "trace_explorer.html",
     ]:
         assert name in text

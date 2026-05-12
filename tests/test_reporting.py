@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from cdsd.reporting import (
+    REQUIRED_ARTIFACTS,
     all_passed,
     validate_experiment,
     validate_required_artifacts,
@@ -47,6 +48,22 @@ def test_required_artifacts_validator_checks_nonempty_files(tmp_path: Path):
     gates = validate_required_artifacts(tmp_path, ["present.txt", "missing.txt"])
     assert gates[0].passed
     assert not gates[1].passed
+
+
+def test_required_artifacts_include_model_trace_explorer():
+    assert "model_integration_traces.jsonl" in REQUIRED_ARTIFACTS
+    assert "trace_explorer.html" in REQUIRED_ARTIFACTS
+
+
+def test_trace_artifacts_are_required_and_nonempty(tmp_path: Path):
+    (tmp_path / "model_integration_traces.jsonl").write_text('{"schema_version": 1}\n', encoding="utf-8")
+    (tmp_path / "trace_explorer.html").write_text("<!doctype html>\n", encoding="utf-8")
+
+    gates = validate_required_artifacts(tmp_path, ["model_integration_traces.jsonl", "trace_explorer.html", "empty.html"])
+
+    assert gates[0].passed
+    assert gates[1].passed
+    assert not gates[2].passed
 
 
 def test_tokenizer_correctness_validator_requires_real_adapters_and_case_floor():

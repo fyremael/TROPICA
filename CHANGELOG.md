@@ -10,3 +10,4 @@
 - Added package metadata, CI badge, and GitHub-ready workflow hardening.
 - Added offline model-integration SDK, traces, evidence harness, and dashboard.
 - Added Colab notebook pack for onboarding, benchmark evidence, and researcher showcase workflows.
+- Added static trace explorer artifacts and optional local Hugging Face model bridge.

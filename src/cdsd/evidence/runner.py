@@ -53,6 +53,7 @@ REPORT_TRACKS = [
         [
             ("model_integration_harness", "demos.run_model_integration_harness"),
             ("model_integration_visuals", "demos.render_model_integration_visuals"),
+            ("trace_explorer", "demos.render_trace_explorer"),
         ],
     ),
 ]
@@ -265,6 +266,10 @@ def write_report_index(artifact_dir: Path, gates) -> Path:
         "",
         model_integration_interpretation(artifact_dir),
         "",
+        "Trace explorer: [open static token trace](trace_explorer.html).",
+        "",
+        "Interpretation: the trace explorer shows each selected token, allowed support size, top illegal token, and accepting state so reviewers can inspect why illegal logits failed closed.",
+        "",
         "## Stress Dashboard",
         "",
         "![Stress visuals](stress_visuals.svg)",
@@ -316,6 +321,8 @@ def write_manifest(artifact_dir: Path, command_results, gates) -> Path:
             artifact_entry(artifact_dir, "model_integration_summary.csv"),
             artifact_entry(artifact_dir, "model_integration_summary.md"),
             artifact_entry(artifact_dir, "model_integration_visuals.svg"),
+            artifact_entry(artifact_dir, "model_integration_traces.jsonl"),
+            artifact_entry(artifact_dir, "trace_explorer.html"),
             artifact_entry(artifact_dir, "report_index.md"),
         ],
         "gates": [gate.to_dict() for gate in gates],

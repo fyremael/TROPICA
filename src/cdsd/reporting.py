@@ -25,6 +25,8 @@ REQUIRED_ARTIFACTS = [
     "model_integration_summary.csv",
     "model_integration_summary.md",
     "model_integration_visuals.svg",
+    "model_integration_traces.jsonl",
+    "trace_explorer.html",
 ]
 
 

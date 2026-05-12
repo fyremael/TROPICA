@@ -11,6 +11,8 @@ def test_public_exports_import_cleanly() -> None:
     assert cdsd.StructuredOutputCompiler is not None
     assert cdsd.StructuredOutputDecoder is not None
     assert cdsd.HostileLogitProvider is not None
+    assert cdsd.HFLocalLogitProvider is not None
+    assert cdsd.LocalModelBridgeError is not None
     assert cdsd.ToolCallSpec is not None
     assert cdsd.TiktokenAdapter is not None
     assert cdsd.HFTokenizerAdapter is not None
@@ -23,6 +25,7 @@ def test_build_commands_respects_pytest_flag() -> None:
     assert "pytest" not in without_pytest
     assert with_pytest[0] == "pytest"
     assert "structured_output_visuals" in without_pytest
+    assert "trace_explorer" in without_pytest
 
 
 def test_cli_main_propagates_runner_exit(monkeypatch, tmp_path: Path) -> None:

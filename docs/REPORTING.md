@@ -51,6 +51,8 @@ Every run writes the following artifact family:
 - `*_summary.csv`: metric tables used by gates and visuals
 - `*_summary.md`: readable metric summaries
 - `*_visuals.svg`: dashboards for review and CI artifacts
+- `model_integration_traces.jsonl`: representative token-level decode traces
+- `trace_explorer.html`: static HTML trace viewer linked from the report index
 
 ## Gate Reading
 
@@ -77,6 +79,10 @@ The dashboards are not decorative. Each one answers a specific trust question:
 | Model integration | Can provider-driven decode loops consume legal token masks while illegal logits fail closed? |
 | Stress | Do the contracts survive randomized and adversarial cases? |
 | Scale | Do larger frontiers preserve correctness without obvious cliffs? |
+
+The trace explorer is the inspectability layer for model integration. It shows
+scenario-level traces, selected token IDs/text, allowed support size, selected
+score, top illegal token, illegal score, and accepting state.
 
 ## CI Pattern
 
