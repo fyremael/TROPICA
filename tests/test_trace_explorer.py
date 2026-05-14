@@ -37,3 +37,45 @@ def test_trace_explorer_embeds_trace_data():
     assert "trace-data" in html
     assert "hostile" in html
     assert "top_illegal_score" in html
+
+
+def test_trace_explorer_handles_unified_support_events():
+    traces = [
+        {
+            "schema_version": 1,
+            "trace_type": "unified_support",
+            "family": "dyck",
+            "scenario": {"provider": "support-contract", "suite": "balanced", "family": "dyck"},
+            "accepted": True,
+            "value": "( ) <eos>",
+            "parsed": None,
+            "emitted_token_ids": [],
+            "steps": 1,
+            "events": [
+                {
+                    "schema_version": 1,
+                    "trace_type": "support_event",
+                    "family": "dyck",
+                    "scenario": "balanced",
+                    "step": 0,
+                    "state_summary": {"balance": 0},
+                    "planner_support": ["("],
+                    "guard_support": ["("],
+                    "policy_support": None,
+                    "final_support": ["("],
+                    "selected": "(",
+                    "selected_score": 1.0,
+                    "selected_was_allowed": True,
+                    "accepting": False,
+                    "failure_reason": None,
+                    "planner_trace": {},
+                }
+            ],
+        }
+    ]
+
+    html = render_html(traces)
+
+    assert "support-contract" in html
+    assert "final_support" in html
+    assert "selected" in html

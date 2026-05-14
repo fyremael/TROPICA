@@ -26,6 +26,10 @@ REQUIRED_ARTIFACTS = [
     "model_integration_summary.md",
     "model_integration_visuals.svg",
     "model_integration_traces.jsonl",
+    "unified_trace_summary.csv",
+    "unified_trace_summary.md",
+    "unified_trace_visuals.svg",
+    "unified_traces.jsonl",
     "trace_explorer.html",
 ]
 
@@ -164,6 +168,21 @@ def validate_model_integration(rows: list[dict[str, str]]) -> list[GateResult]:
     ]
 
 
+def validate_unified_traces(rows: list[dict[str, str]]) -> list[GateResult]:
+    failures = [int(float(row["Failures"])) for row in rows]
+    trace_events = sum(int(float(row["TraceEvents"])) for row in rows)
+    negative_controls = sum(int(float(row["NegativeControls"])) for row in rows)
+    families = {row["Family"] for row in rows}
+    required = {"dyck", "json_schema", "workflow", "grid", "tokenizer", "control_delta", "contract"}
+    missing = sorted(required - families)
+    return [
+        GateResult("unified_trace:failures_zero", all(value == 0 for value in failures), f"total_failures={sum(failures)}"),
+        GateResult("unified_trace:required_families_present", not missing, f"missing={missing} families={sorted(families)}"),
+        GateResult("unified_trace:event_floor", trace_events >= 25, f"trace_events={trace_events}"),
+        GateResult("unified_trace:negative_controls_present", negative_controls >= 4, f"negative_controls={negative_controls}"),
+    ]
+
+
 def validate_all(command_results: list[dict[str, object]], artifact_dir: Path) -> list[GateResult]:
     gates = []
     gates.extend(validate_command_results(command_results))
@@ -193,6 +212,10 @@ def validate_all(command_results: list[dict[str, object]], artifact_dir: Path) -
         gates.extend(validate_model_integration(read_csv_rows(artifact_dir / "model_integration_summary.csv")))
     except Exception as exc:
         gates.append(GateResult("model_integration:readable", False, repr(exc)))
+    try:
+        gates.extend(validate_unified_traces(read_csv_rows(artifact_dir / "unified_trace_summary.csv")))
+    except Exception as exc:
+        gates.append(GateResult("unified_trace:readable", False, repr(exc)))
     return gates
 
 

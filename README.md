@@ -56,6 +56,7 @@ cdsd-report --artifacts smoke_artifacts --jobs 4
 ## Package contents
 
 - `src/cdsd/control_delta_block.py` — Gated delta-style control lane.
+- `src/cdsd/contracts.py` — formal planner/guard/policy support contracts, typed violations, and unified trace events.
 - `src/cdsd/decoder.py` — support-contract decoder.
 - `src/cdsd/masks.py` — mask utilities and safety checks.
 - `src/cdsd/cli.py` — public `cdsd-report` command.
@@ -74,7 +75,9 @@ cdsd-report --artifacts smoke_artifacts --jobs 4
 - `demos/run_scale_harness.py` — deterministic scale sweeps for core surfaces.
 - `demos/run_tokenizer_correctness_harness.py` — real-tokenizer exactness and negative controls.
 - `demos/run_structured_output_harness.py` — bounded JSON/tool-call masks over real tokenizers.
-- `demos/render_trace_explorer.py` — static model-integration trace explorer.
+- `demos/run_unified_trace_harness.py` — unified planner/guard/tokenizer/workflow/grid/ControlDelta traces.
+- `demos/render_unified_trace_visuals.py` — unified contract trace dashboard.
+- `demos/render_trace_explorer.py` — static trace explorer for model-integration and unified support traces.
 - `tests/` — unit, validator, tokenizer, structured-output, CLI, and packaging tests.
 - `prompts/` — Codex implementation prompts by module.
 - `docs/` — architecture, metrics, and experiment plans.
@@ -104,6 +107,8 @@ python demos/run_structured_output_harness.py
 python demos/render_structured_output_visuals.py
 python demos/run_model_integration_harness.py
 python demos/render_model_integration_visuals.py
+python demos/run_unified_trace_harness.py
+python demos/render_unified_trace_visuals.py
 python demos/render_trace_explorer.py
 python -m pytest tests
 ```

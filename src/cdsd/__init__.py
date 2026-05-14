@@ -1,5 +1,18 @@
 """Control-Delta Support Decoding."""
 
+from .contracts import (
+    EmptySupportViolation,
+    Generator,
+    Guard,
+    IllegalSelectionError,
+    IllegalTransitionError,
+    Planner,
+    PlannerOutput,
+    Policy,
+    StaleStateError,
+    SupportContractError,
+    UnifiedTraceEvent,
+)
 from .decoder import SupportDecoder, DecodeTrace
 from .masks import SupportMask, intersect_masks, masked_softmax_sample
 from .model_integration import (
@@ -21,22 +34,33 @@ __all__ = [
     "CallableLogitProvider",
     "DecodeEvent",
     "DecodeTrace",
+    "EmptySupportViolation",
+    "Generator",
+    "Guard",
     "HFLocalLogitProvider",
     "HFTokenizerAdapter",
     "HostileLogitProvider",
+    "IllegalSelectionError",
+    "IllegalTransitionError",
     "LocalModelBridgeError",
     "LogitProvider",
     "MaskedDecodeResult",
+    "Planner",
+    "PlannerOutput",
+    "Policy",
     "ScriptedLogitProvider",
     "StructuredOutputCompiler",
     "StructuredOutputDecodeError",
     "StructuredOutputDecoder",
+    "StaleStateError",
+    "SupportContractError",
     "SupportDecoder",
     "SupportMask",
     "TiktokenAdapter",
     "TokenPrefixAutomaton",
     "TokenizerPrefixError",
     "ToolCallSpec",
+    "UnifiedTraceEvent",
     "intersect_masks",
     "masked_softmax_sample",
 ]

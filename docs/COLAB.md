@@ -7,7 +7,7 @@ from a browser runtime before investing in local setup.
 
 | Notebook | Link | Use |
 | --- | --- | --- |
-| Operator onboarding | [Open in Colab](https://colab.research.google.com/github/fyremael/TROPICA/blob/main/notebooks/01_operator_onboarding.ipynb) | Install TROPICA, run the evidence suite, and inspect the report index plus model-integration dashboard. |
+| Operator onboarding | [Open in Colab](https://colab.research.google.com/github/fyremael/TROPICA/blob/main/notebooks/01_operator_onboarding.ipynb) | Install TROPICA, run the evidence suite, and inspect the report index plus model-integration and unified-trace dashboards. |
 | Benchmark suite | [Open in Colab](https://colab.research.google.com/github/fyremael/TROPICA/blob/main/notebooks/02_benchmark_suite.ipynb) | Run `cdsd-report`, summarize gate status, display all dashboards, and zip artifacts for review. |
 | Researcher showcase | [Open in Colab](https://colab.research.google.com/github/fyremael/TROPICA/blob/main/notebooks/03_researcher_showcase.ipynb) | Compile bounded tool-call specs into real tokenizer masks, run offline logit providers, inspect traces, render the static trace explorer, and exercise negative controls. |
 
@@ -31,9 +31,9 @@ The notebooks expose the same evidence surfaces as CI:
 
 - `report_manifest.json` is the pass/fail source of truth.
 - `report_index.md` is the reviewer-facing interpretation layer.
-- `trace_explorer.html` is the token-level inspectability surface.
+- `trace_explorer.html` is the token-level and support-contract inspectability surface.
 - SVG dashboards show experiment, tokenizer, structured-output,
-  model-integration, stress, and scale behavior.
+  model-integration, unified-trace, stress, and scale behavior.
 
 The researcher notebook is intentionally offline. It shows how a local model or
 synthetic provider can drive `StructuredOutputDecoder` without network calls or

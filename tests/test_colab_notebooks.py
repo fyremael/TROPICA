@@ -60,9 +60,11 @@ def test_operator_and_benchmark_run_report_command():
     assert "cdsd-report" in operator
     assert "report_manifest.json" in operator
     assert "model_integration_visuals.svg" in operator
+    assert "unified_trace_visuals.svg" in operator
     assert "cdsd-report" in benchmark
     assert "experiment_visuals.svg" in benchmark
     assert "model_integration_visuals.svg" in benchmark
+    assert "unified_trace_visuals.svg" in benchmark
     assert "trace_explorer.html" in benchmark
     assert "scale_visuals.svg" in benchmark
 

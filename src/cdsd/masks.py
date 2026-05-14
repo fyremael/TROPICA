@@ -5,6 +5,8 @@ from typing import Iterable, Sequence
 import math
 import random
 
+from .contracts import EmptySupportViolation
+
 
 @dataclass(frozen=True)
 class SupportMask:
@@ -30,7 +32,7 @@ class SupportMask:
             raise EmptySupportError("Final support is empty. Abstain, backtrack, or replan; never sample.")
 
 
-class EmptySupportError(RuntimeError):
+class EmptySupportError(EmptySupportViolation):
     pass
 
 

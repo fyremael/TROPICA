@@ -8,16 +8,21 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_DIR = Path(os.environ.get("CDSD_ARTIFACT_DIR", ROOT / "artifacts"))
 TRACE_PATH = ARTIFACT_DIR / "model_integration_traces.jsonl"
+UNIFIED_TRACE_PATH = ARTIFACT_DIR / "unified_traces.jsonl"
+TRACE_PATHS = (TRACE_PATH, UNIFIED_TRACE_PATH)
 HTML_PATH = ARTIFACT_DIR / "trace_explorer.html"
 
 
-def load_traces(path: Path = TRACE_PATH) -> list[dict[str, object]]:
+def load_traces(paths: list[Path] | tuple[Path, ...] = TRACE_PATHS) -> list[dict[str, object]]:
     traces = []
-    with path.open(encoding="utf-8") as fh:
-        for line in fh:
-            text = line.strip()
-            if text:
-                traces.append(json.loads(text))
+    for path in paths:
+        if not path.exists():
+            continue
+        with path.open(encoding="utf-8") as fh:
+            for line in fh:
+                text = line.strip()
+                if text:
+                    traces.append(json.loads(text))
     return traces
 
 
@@ -77,7 +82,7 @@ def render_html(traces: list[dict[str, object]]) -> str:
 <body>
   <header>
     <h1>TROPICA Trace Explorer</h1>
-    <p>Token-by-token evidence for structured decode scenarios. The decoder may see illegal scores, but selected IDs must remain inside legal support.</p>
+    <p>Token-by-token evidence for structured decode and unified support scenarios. The decoder may see illegal scores, but selected tokens/actions must remain inside final support.</p>
   </header>
   <main>
     <section>
@@ -85,13 +90,14 @@ def render_html(traces: list[dict[str, object]]) -> str:
         <h2>Scenarios</h2>
         <div>
           <button data-sort="provider">Provider</button>
+          <button data-sort="family">Family</button>
           <button data-sort="steps">Steps</button>
           <button data-sort="accepted">Status</button>
         </div>
       </div>
       <div class="scroll">
         <table class="scenario-table">
-          <thead><tr><th>Provider</th><th>Suite</th><th>Steps</th><th>Status</th></tr></thead>
+          <thead><tr><th>Provider</th><th>Family</th><th>Suite</th><th>Steps</th><th>Status</th></tr></thead>
           <tbody id="scenarioRows"></tbody>
         </table>
       </div>
@@ -115,7 +121,7 @@ def render_html(traces: list[dict[str, object]]) -> str:
           <table>
             <thead>
               <tr>
-                <th>Step</th><th>Allowed</th><th>Selected ID</th><th>Selected Text</th><th>Score</th><th>Top Illegal</th><th>Illegal Score</th><th>Accepted</th>
+                <th>Step</th><th>Allowed</th><th>Selected</th><th>Selected Text</th><th>Score</th><th>Top Illegal</th><th>Illegal Score</th><th>Accepting</th>
               </tr>
             </thead>
             <tbody id="eventRows"></tbody>
@@ -134,9 +140,23 @@ def render_html(traces: list[dict[str, object]]) -> str:
       return trace.scenario || {{}};
     }}
 
-    function label(trace) {{
+    function provider(trace) {{
       const s = scenario(trace);
-      return `${{s.provider || "unknown"}} / ${{s.suite || s.name || "trace"}}`;
+      return s.provider || "support-contract";
+    }}
+
+    function family(trace) {{
+      const s = scenario(trace);
+      return trace.family || s.family || "model_integration";
+    }}
+
+    function suite(trace) {{
+      const s = scenario(trace);
+      return s.suite || s.name || trace.trace_type || "trace";
+    }}
+
+    function label(trace) {{
+      return `${{provider(trace)}} / ${{family(trace)}} / ${{suite(trace)}}`;
     }}
 
     function text(value) {{
@@ -156,8 +176,28 @@ def render_html(traces: list[dict[str, object]]) -> str:
         const ta = traces[a], tb = traces[b];
         if (sortKey === "steps") return Number(tb.steps || 0) - Number(ta.steps || 0);
         if (sortKey === "accepted") return Number(tb.accepted) - Number(ta.accepted);
+        if (sortKey === "family") return family(ta).localeCompare(family(tb));
         return label(ta).localeCompare(label(tb));
       }});
+    }}
+
+    function allowedCount(event) {{
+      if (event.allowed_count !== undefined && event.allowed_count !== null) return event.allowed_count;
+      return (event.final_support || []).length;
+    }}
+
+    function selectedValue(event) {{
+      if (event.selected_token_id !== undefined && event.selected_token_id !== null) return event.selected_token_id;
+      return event.selected;
+    }}
+
+    function selectedText(event) {{
+      if (event.selected_token_text !== undefined && event.selected_token_text !== null) return event.selected_token_text;
+      return event.selected;
+    }}
+
+    function eventAccepting(event) {{
+      return Boolean(event.accepted || event.accepting);
     }}
 
     function renderScenarios() {{
@@ -165,10 +205,9 @@ def render_html(traces: list[dict[str, object]]) -> str:
       rows.innerHTML = "";
       for (const idx of sortedIndexes()) {{
         const trace = traces[idx];
-        const s = scenario(trace);
         const tr = document.createElement("tr");
         tr.dataset.selected = String(idx === selectedIndex);
-        tr.innerHTML = `<td>${{text(s.provider)}}</td><td>${{text(s.suite || s.name)}}</td><td>${{text(trace.steps)}}</td><td>${{status(trace)}}</td>`;
+        tr.innerHTML = `<td>${{text(provider(trace))}}</td><td>${{text(family(trace))}}</td><td>${{text(suite(trace))}}</td><td>${{text(trace.steps)}}</td><td>${{status(trace)}}</td>`;
         tr.addEventListener("click", () => {{ selectedIndex = idx; renderScenarios(); renderTrace(); }});
         rows.appendChild(tr);
       }}
@@ -183,7 +222,7 @@ def render_html(traces: list[dict[str, object]]) -> str:
       document.getElementById("tokenMetric").textContent = text((trace.emitted_token_ids || []).length);
       const illegalOutranks = events.filter(e => e.top_illegal_score !== null && e.top_illegal_score > e.selected_score).length;
       document.getElementById("illegalMetric").textContent = illegalOutranks;
-      document.getElementById("finalValue").textContent = trace.value || trace.error || "";
+      document.getElementById("finalValue").textContent = trace.value || trace.error || JSON.stringify(trace.parsed || "", null, 2);
       const rows = document.getElementById("eventRows");
       rows.innerHTML = "";
       for (const event of events) {{
@@ -191,7 +230,8 @@ def render_html(traces: list[dict[str, object]]) -> str:
           ? ""
           : `${{event.top_illegal_token_id}} ${{event.top_illegal_token_text ? "(" + event.top_illegal_token_text + ")" : ""}}`;
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${{event.step}}</td><td>${{event.allowed_count}}</td><td>${{event.selected_token_id}}</td><td class="token">${{text(event.selected_token_text)}}</td><td>${{fmtScore(event.selected_score)}}</td><td class="token">${{illegal}}</td><td>${{fmtScore(event.top_illegal_score)}}</td><td>${{event.accepted ? "yes" : ""}}</td>`;
+        tr.title = `final_support: ${{JSON.stringify(event.final_support || event.allowed_token_ids || [])}}`;
+        tr.innerHTML = `<td>${{event.step}}</td><td>${{allowedCount(event)}}</td><td>${{text(selectedValue(event))}}</td><td class="token">${{text(selectedText(event))}}</td><td>${{fmtScore(event.selected_score)}}</td><td class="token">${{illegal}}</td><td>${{fmtScore(event.top_illegal_score)}}</td><td>${{eventAccepting(event) ? "yes" : ""}}</td>`;
         rows.appendChild(tr);
       }}
     }}
@@ -211,7 +251,7 @@ def render_html(traces: list[dict[str, object]]) -> str:
 if __name__ == "__main__":
     traces = load_traces()
     if not traces:
-        raise SystemExit(f"No traces found in {TRACE_PATH}")
+        raise SystemExit(f"No traces found in {', '.join(str(path) for path in TRACE_PATHS)}")
     HTML_PATH.parent.mkdir(exist_ok=True)
     HTML_PATH.write_text(render_html(traces), encoding="utf-8")
     print(f"Wrote {HTML_PATH}")

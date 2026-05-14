@@ -53,6 +53,8 @@ REPORT_TRACKS = [
         [
             ("model_integration_harness", "demos.run_model_integration_harness"),
             ("model_integration_visuals", "demos.render_model_integration_visuals"),
+            ("unified_trace_harness", "demos.run_unified_trace_harness"),
+            ("unified_trace_visuals", "demos.render_unified_trace_visuals"),
             ("trace_explorer", "demos.render_trace_explorer"),
         ],
     ),
@@ -233,6 +235,20 @@ def model_integration_interpretation(artifact_dir: Path) -> str:
     )
 
 
+def unified_trace_interpretation(artifact_dir: Path) -> str:
+    rows = read_csv_rows(artifact_dir / "unified_trace_summary.csv")
+    cases = sum(int(float(row["Cases"])) for row in rows)
+    failures = sum(int(float(row["Failures"])) for row in rows)
+    trace_events = sum(int(float(row["TraceEvents"])) for row in rows)
+    negative_controls = sum(int(float(row["NegativeControls"])) for row in rows)
+    families = sorted({row["Family"] for row in rows})
+    return (
+        f"The unified trace pass covers {cases:,} contract cases with {failures} failures, "
+        f"{trace_events:,} trace events, and {negative_controls:,} negative controls. "
+        f"Families exercised: {', '.join(families)}."
+    )
+
+
 def write_report_index(artifact_dir: Path, gates) -> Path:
     path = artifact_dir / "report_index.md"
     passed = all_passed(gates)
@@ -266,9 +282,15 @@ def write_report_index(artifact_dir: Path, gates) -> Path:
         "",
         model_integration_interpretation(artifact_dir),
         "",
-        "Trace explorer: [open static token trace](trace_explorer.html).",
+        "## Unified Trace Dashboard",
         "",
-        "Interpretation: the trace explorer shows each selected token, allowed support size, top illegal token, and accepting state so reviewers can inspect why illegal logits failed closed.",
+        "![Unified trace visuals](unified_trace_visuals.svg)",
+        "",
+        unified_trace_interpretation(artifact_dir),
+        "",
+        "Trace explorer: [open static support trace explorer](trace_explorer.html).",
+        "",
+        "Interpretation: the trace explorer now joins model, planner, guard, tokenizer, workflow, grid, and ControlDelta traces so reviewers can inspect the exact support intersection behind every selected token/action.",
         "",
         "## Stress Dashboard",
         "",
@@ -322,6 +344,10 @@ def write_manifest(artifact_dir: Path, command_results, gates) -> Path:
             artifact_entry(artifact_dir, "model_integration_summary.md"),
             artifact_entry(artifact_dir, "model_integration_visuals.svg"),
             artifact_entry(artifact_dir, "model_integration_traces.jsonl"),
+            artifact_entry(artifact_dir, "unified_trace_summary.csv"),
+            artifact_entry(artifact_dir, "unified_trace_summary.md"),
+            artifact_entry(artifact_dir, "unified_trace_visuals.svg"),
+            artifact_entry(artifact_dir, "unified_traces.jsonl"),
             artifact_entry(artifact_dir, "trace_explorer.html"),
             artifact_entry(artifact_dir, "report_index.md"),
         ],

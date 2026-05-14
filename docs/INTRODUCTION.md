@@ -87,7 +87,7 @@ contract, then records whether that contract survives realistic edge cases.
 
 ## Methodology
 
-TROPICA combines five layers.
+TROPICA combines six layers.
 
 1. Planners define semantic feasibility.
 
@@ -118,6 +118,13 @@ TROPICA combines five layers.
    The report runner executes tests, harnesses, visuals, and thresholds. It
    writes both human-readable and machine-readable artifacts.
 
+6. Formal contracts and unified traces make failures inspectable.
+
+   `cdsd.contracts` defines the planner/guard/policy support contract, typed
+   violations, and a shared trace schema. The report runner records representative
+   support traces across model integration, Dyck, JSON schema, workflows, grid
+   planning, tokenizer automata, and ControlDelta.
+
 ## What The Evidence Suite Proves
 
 Run:
@@ -134,7 +141,7 @@ The command writes:
 - `artifacts/*_summary.md`
 - `artifacts/*_visuals.svg`
 
-The dashboards cover six surfaces.
+The dashboards cover seven surfaces.
 
 | Surface | What It Shows | What Passing Means |
 | --- | --- | --- |
@@ -142,6 +149,7 @@ The dashboards cover six surfaces.
 | Tokenizer correctness | Real tokenizer exact generation and negative controls | Literal masks survive Unicode, whitespace, shared prefixes, invalid IDs, truncation, and suffix attacks |
 | Structured output | Bounded JSON/tool-call compilation and hostile decode | Real token masks can constrain generation to exact valid tool calls |
 | Model integration | Offline provider-driven decode loops and trace events | Model adapters can rank legal and illegal IDs while the decoder selects only legal support |
+| Unified traces | Planner/guard/policy/tokenizer/workflow/grid/ControlDelta support events | Every selected token/action is inside the intersection-derived final support |
 | Stress | Adversarial and randomized cases across planners, guards, workflows, tokenizer automata, and ControlDelta numerics | The core contracts survive thousands of cases |
 | Scale | Larger horizons, enum counts, workflow graphs, and ControlDelta sequence sizes | Correctness remains intact as problem size increases |
 
@@ -212,6 +220,7 @@ records trace events.
 ## Project Map
 
 - `src/cdsd/decoder.py`: support-contract decode loop
+- `src/cdsd/contracts.py`: formal support protocols, typed violations, and unified trace events
 - `src/cdsd/masks.py`: mask utilities and safety checks
 - `src/cdsd/tokenizer_compiler.py`: tokenizer adapters and token-prefix automata
 - `src/cdsd/structured_output.py`: bounded JSON/tool-call compiler
@@ -236,7 +245,8 @@ What is solid today:
 - strict tokenizer round-trip validation
 - bounded structured-output compiler
 - offline model-integration decoder and trace events
-- static trace explorer for token-by-token model-integration inspection
+- formal planner/guard/policy support contracts
+- static trace explorer for model and unified support inspection
 - deterministic hostile-logit decode tests
 - report dashboards and CI gates
 - Colab notebooks for onboarding, benchmark evidence, and researcher demos
@@ -256,7 +266,7 @@ The next useful milestones are:
 - richer bounded schema support without weakening fail-closed behavior
 - production model adapters for local and hosted inference loops
 - larger benchmark suites for latency and memory scaling
-- broader trace unification across planners, guards, and tokenizer automata
+- broader trace unification for planner proofs, guard internals, and tokenizer automata at scale
 - package signing and release automation
 - integration examples for tool routers, workflow agents, and CI review bots
 - clearer formal contracts for planner/guard composition

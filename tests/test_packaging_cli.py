@@ -16,6 +16,8 @@ def test_public_exports_import_cleanly() -> None:
     assert cdsd.ToolCallSpec is not None
     assert cdsd.TiktokenAdapter is not None
     assert cdsd.HFTokenizerAdapter is not None
+    assert cdsd.SupportContractError is not None
+    assert cdsd.UnifiedTraceEvent is not None
 
 
 def test_build_commands_respects_pytest_flag() -> None:
@@ -25,6 +27,8 @@ def test_build_commands_respects_pytest_flag() -> None:
     assert "pytest" not in without_pytest
     assert with_pytest[0] == "pytest"
     assert "structured_output_visuals" in without_pytest
+    assert "unified_trace_harness" in without_pytest
+    assert "unified_trace_visuals" in without_pytest
     assert "trace_explorer" in without_pytest
 
 

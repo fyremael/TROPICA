@@ -32,6 +32,8 @@ The `--jobs` flag runs independent report tracks concurrently:
 - tokenizer correctness
 - structured output
 - model integration
+- unified traces, inside the model-integration track so the shared explorer is
+  rendered after all trace inputs exist
 - pytest, when `--with-pytest` is set
 
 Each track still preserves its internal order. For example, experiment visuals
@@ -52,6 +54,8 @@ Every run writes the following artifact family:
 - `*_summary.md`: readable metric summaries
 - `*_visuals.svg`: dashboards for review and CI artifacts
 - `model_integration_traces.jsonl`: representative token-level decode traces
+- `unified_traces.jsonl`: planner/guard/policy/tokenizer/workflow/grid/
+  ControlDelta support traces under the shared schema
 - `trace_explorer.html`: static HTML trace viewer linked from the report index
 
 ## Gate Reading
@@ -77,12 +81,14 @@ The dashboards are not decorative. Each one answers a specific trust question:
 | Tokenizer correctness | Do real tokenizer masks survive exact literals and negative controls? |
 | Structured output | Can bounded JSON/tool-call specs compile to real token-ID masks and decode under hostile logits? |
 | Model integration | Can provider-driven decode loops consume legal token masks while illegal logits fail closed? |
+| Unified traces | Does every selected token/action remain inside an intersection-derived final support across planner, guard, tokenizer, workflow, grid, and ControlDelta surfaces? |
 | Stress | Do the contracts survive randomized and adversarial cases? |
 | Scale | Do larger frontiers preserve correctness without obvious cliffs? |
 
-The trace explorer is the inspectability layer for model integration. It shows
-scenario-level traces, selected token IDs/text, allowed support size, selected
-score, top illegal token, illegal score, and accepting state.
+The trace explorer is the inspectability layer for model integration and the
+formal support contract. It shows scenario-level traces, selected token IDs or
+actions, allowed support size, selected score, top illegal token when present,
+final support, and accepting state.
 
 ## CI Pattern
 

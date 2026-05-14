@@ -10,6 +10,7 @@ from cdsd.reporting import (
     validate_structured_output,
     validate_model_integration,
     validate_tokenizer_correctness,
+    validate_unified_traces,
 )
 
 
@@ -52,6 +53,8 @@ def test_required_artifacts_validator_checks_nonempty_files(tmp_path: Path):
 
 def test_required_artifacts_include_model_trace_explorer():
     assert "model_integration_traces.jsonl" in REQUIRED_ARTIFACTS
+    assert "unified_traces.jsonl" in REQUIRED_ARTIFACTS
+    assert "unified_trace_visuals.svg" in REQUIRED_ARTIFACTS
     assert "trace_explorer.html" in REQUIRED_ARTIFACTS
 
 
@@ -59,11 +62,14 @@ def test_trace_artifacts_are_required_and_nonempty(tmp_path: Path):
     (tmp_path / "model_integration_traces.jsonl").write_text('{"schema_version": 1}\n', encoding="utf-8")
     (tmp_path / "trace_explorer.html").write_text("<!doctype html>\n", encoding="utf-8")
 
-    gates = validate_required_artifacts(tmp_path, ["model_integration_traces.jsonl", "trace_explorer.html", "empty.html"])
+    (tmp_path / "unified_traces.jsonl").write_text('{"schema_version": 1}\n', encoding="utf-8")
+
+    gates = validate_required_artifacts(tmp_path, ["model_integration_traces.jsonl", "unified_traces.jsonl", "trace_explorer.html", "empty.html"])
 
     assert gates[0].passed
     assert gates[1].passed
-    assert not gates[2].passed
+    assert gates[2].passed
+    assert not gates[3].passed
 
 
 def test_tokenizer_correctness_validator_requires_real_adapters_and_case_floor():
@@ -121,3 +127,26 @@ def test_model_integration_validator_rejects_failures_or_missing_provider():
     assert not all_passed(gates)
     assert any(gate.name == "model_integration:failures_zero" and not gate.passed for gate in gates)
     assert any(gate.name == "model_integration:hostile_present" and not gate.passed for gate in gates)
+
+
+def test_unified_trace_validator_requires_families_events_and_controls():
+    rows = [
+        {"Family": "dyck", "Cases": "3", "Failures": "0", "TraceEvents": "3", "NegativeControls": "0"},
+        {"Family": "json_schema", "Cases": "10", "Failures": "0", "TraceEvents": "10", "NegativeControls": "0"},
+        {"Family": "workflow", "Cases": "4", "Failures": "0", "TraceEvents": "4", "NegativeControls": "0"},
+        {"Family": "grid", "Cases": "12", "Failures": "0", "TraceEvents": "12", "NegativeControls": "0"},
+        {"Family": "tokenizer", "Cases": "3", "Failures": "0", "TraceEvents": "3", "NegativeControls": "0"},
+        {"Family": "control_delta", "Cases": "4", "Failures": "0", "TraceEvents": "4", "NegativeControls": "0"},
+        {"Family": "contract", "Cases": "5", "Failures": "0", "TraceEvents": "1", "NegativeControls": "4"},
+    ]
+    assert all_passed(validate_unified_traces(rows))
+
+
+def test_unified_trace_validator_rejects_missing_family_or_failure():
+    rows = [
+        {"Family": "dyck", "Cases": "30", "Failures": "1", "TraceEvents": "30", "NegativeControls": "4"},
+    ]
+    gates = validate_unified_traces(rows)
+    assert not all_passed(gates)
+    assert any(gate.name == "unified_trace:failures_zero" and not gate.passed for gate in gates)
+    assert any(gate.name == "unified_trace:required_families_present" and not gate.passed for gate in gates)

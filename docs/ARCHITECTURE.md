@@ -15,6 +15,12 @@ logits[~final_mask] = -inf
 sample(logits)
 ```
 
+`cdsd.contracts` makes this explicit in code. The decoder validates that final
+support is the exact intersection of planner, guard, and policy masks, raises
+typed violations for empty support or illegal selections, and can emit unified
+trace events with planner support, guard support, policy support, final support,
+selected token/action, state summary, accepting state, and failure reason.
+
 ## Internal control lane
 
 The control lane consumes planner/guard features and maintains a small recurrent memory:

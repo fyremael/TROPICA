@@ -61,6 +61,11 @@ text when a tokenizer is provided, and ordered events. Each event includes
 allowed token IDs, selected token ID/text, selected score, top illegal token
 ID/text/score when present, and accepting state.
 
+The same `trace_explorer.html` also loads `unified_traces.jsonl`, which uses the
+formal support schema from `cdsd.contracts`. Those events expose planner
+support, guard support, optional policy support, final support, selected
+token/action, state summary, accepting state, and failure reason.
+
 ## Built-In Offline Providers
 
 - `HostileLogitProvider`: gives illegal token IDs very high scores to prove the
@@ -103,6 +108,8 @@ Run it directly:
 ```bash
 python demos/run_model_integration_harness.py
 python demos/render_model_integration_visuals.py
+python demos/run_unified_trace_harness.py
+python demos/render_unified_trace_visuals.py
 python demos/render_trace_explorer.py
 ```
 

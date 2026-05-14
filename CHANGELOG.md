@@ -11,3 +11,4 @@
 - Added offline model-integration SDK, traces, evidence harness, and dashboard.
 - Added Colab notebook pack for onboarding, benchmark evidence, and researcher showcase workflows.
 - Added static trace explorer artifacts and optional local Hugging Face model bridge.
+- Added formal planner/guard/policy support contracts, unified trace JSONL, unified trace SVG dashboard, and report gates.

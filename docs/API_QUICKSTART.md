@@ -28,3 +28,20 @@ print(result.events[-1])
 `HostileLogitProvider` deliberately assigns high scores to illegal token IDs.
 The decoder still selects only from `allowed_token_ids(state)`, records a trace
 event per emitted token, and returns the completed JSON/tool-call value.
+
+For lower-level planner/guard work, import the formal support contract:
+
+```python
+from cdsd import SupportMask
+from cdsd.contracts import ensure_selected_in_support, validate_intersection
+
+plan = SupportMask.from_iter(["SEARCH", "ASK"])
+guard = SupportMask.from_iter(["SEARCH"])
+final = plan & guard
+
+validate_intersection(final, plan, guard)
+ensure_selected_in_support("SEARCH", final)
+```
+
+The same contract fields are emitted into `unified_traces.jsonl` and rendered in
+`trace_explorer.html` after `cdsd-report` runs.
